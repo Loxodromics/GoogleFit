@@ -1,3 +1,5 @@
 <resources>
     <string name="app_name">GoogleFit</string>
+    <string name="request_steps">Request Steps</string>
+    <string name="logout">Logout</string>
 </resources>
