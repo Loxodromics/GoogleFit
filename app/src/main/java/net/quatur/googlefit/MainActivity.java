@@ -2,8 +2,8 @@ package net.quatur.googlefit;
 
 import android.content.Intent;
 import android.content.IntentSender;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
@@ -17,6 +17,8 @@ import com.google.android.gms.common.api.ResultCallback;
 import com.google.android.gms.common.api.Status;
 import com.google.android.gms.fitness.FitnessStatusCodes;
 import com.google.android.gms.fitness.data.DataType;
+import com.google.android.gms.fitness.data.Field;
+import com.google.android.gms.fitness.result.DailyTotalResult;
 
 public class MainActivity extends AppCompatActivity implements GoogleFitApiHelper.RevokeGoogleFitPermissionsListener {
 
@@ -29,8 +31,8 @@ public class MainActivity extends AppCompatActivity implements GoogleFitApiHelpe
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        Button requestStepsButton = (Button)findViewById(R.id.request_steps_button);
-        requestStepsButton.setOnClickListener( new View.OnClickListener() {
+        Button loginButton = (Button) findViewById(R.id.login_button);
+        loginButton.setOnClickListener(new View.OnClickListener() {
 
             @Override
             public void onClick(View v) {
@@ -39,8 +41,17 @@ public class MainActivity extends AppCompatActivity implements GoogleFitApiHelpe
             }
         });
 
-        Button logoutButton = (Button)findViewById(R.id.logout_button);
-        logoutButton.setOnClickListener( new View.OnClickListener() {
+        Button requestStepsButton = (Button) findViewById(R.id.request_steps_button);
+        requestStepsButton.setOnClickListener(new View.OnClickListener() {
+
+            @Override
+            public void onClick(View v) {
+                readData();
+            }
+        });
+
+        Button logoutButton = (Button) findViewById(R.id.logout_button);
+        logoutButton.setOnClickListener(new View.OnClickListener() {
 
             @Override
             public void onClick(View v) {
@@ -49,7 +60,7 @@ public class MainActivity extends AppCompatActivity implements GoogleFitApiHelpe
             }
         });
 
-        TextView outputTextview = (TextView)findViewById(R.id.output_textview);
+        TextView outputTextview = (TextView) findViewById(R.id.output_textview);
     }
 
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
@@ -146,5 +157,34 @@ public class MainActivity extends AppCompatActivity implements GoogleFitApiHelpe
 
     void handleAuthCancelled() {
         Log.i(TAG, "Auth cancelled");
+    }
+
+    /**
+     * Reads the current daily step total, computed from midnight of the current day on the device's
+     * current timezone.
+     */
+    private void readData() {
+        final DataType dataType = DataType.TYPE_STEP_COUNT_DELTA;
+        PendingResult<DailyTotalResult> result = GoogleFitApiHelper.getInstance().readDailyTotal(dataType);
+        result.setResultCallback(new ResultCallback<DailyTotalResult>() {
+            @Override
+            public void onResult(DailyTotalResult dailyTotalResult) {
+                String msg;
+                if (dailyTotalResult.getStatus().isSuccess()) {
+                    long total =
+                            dailyTotalResult.getTotal().isEmpty()
+                                    ? 0
+                                    : dailyTotalResult.getTotal().getDataPoints().get(0).getValue(Field.FIELD_STEPS).asInt();
+                    msg = "Total steps: " + total;
+
+                    TextView outputTextview = (TextView) findViewById(R.id.output_textview);
+                    outputTextview.append("\nTotal steps: " + total);
+                } else {
+                    msg = "There was a problem getting the step count: " + dailyTotalResult.getStatus() + " " + dailyTotalResult.getStatus().getStatusMessage();
+                }
+                Log.i(TAG, msg);
+            }
+        });
+
     }
 }

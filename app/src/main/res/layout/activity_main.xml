@@ -6,6 +6,12 @@
     android:orientation="vertical">
 
     <Button
+        android:id="@+id/login_button"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/login" />
+
+    <Button
         android:id="@+id/request_steps_button"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -22,5 +28,5 @@
     <TextView
         android:id="@+id/output_textview"
         android:layout_width="match_parent"
-        android:layout_height="315dp" />
+        android:layout_height="fill_parent" />
 </LinearLayout>

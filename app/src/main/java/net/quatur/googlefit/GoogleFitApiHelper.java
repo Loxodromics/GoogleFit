@@ -13,6 +13,7 @@ import com.google.android.gms.common.api.Scope;
 import com.google.android.gms.common.api.Status;
 import com.google.android.gms.fitness.Fitness;
 import com.google.android.gms.fitness.data.DataType;
+import com.google.android.gms.fitness.result.DailyTotalResult;
 import com.google.android.gms.fitness.result.SessionStopResult;
 
 
@@ -45,6 +46,7 @@ public class GoogleFitApiHelper {
     public void buildFitnessClient(Context context, GoogleApiClient.ConnectionCallbacks connectionCallbacks, GoogleApiClient.OnConnectionFailedListener onConnectionFailedListener) {
         Log.i(TAG, "buildFitnessClient");
         apiClient = new GoogleApiClient.Builder(context)
+                .addApi(Fitness.HISTORY_API)
                 .addApi(Fitness.CONFIG_API)
                 .addApi(Fitness.RECORDING_API)
                 .addScope(new Scope(Scopes.FITNESS_ACTIVITY_READ))
@@ -112,6 +114,11 @@ public class GoogleFitApiHelper {
     public PendingResult<Status> subscribe(final DataType dataType) {
         Log.i(TAG, "subscribe: " + dataType.getName());
         return Fitness.RecordingApi.subscribe(apiClient, dataType);
+    }
+
+    public PendingResult<DailyTotalResult> readDailyTotal(final DataType dataType) {
+        Log.i(TAG, "readDailyTotal: " + dataType.getName());
+        return Fitness.HistoryApi.readDailyTotal(apiClient, dataType);
     }
 
     public interface RevokeGoogleFitPermissionsListener {
